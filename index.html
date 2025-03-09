@@ -40,6 +40,14 @@
       <button class="action-btn" id="spendGoldBtn">Spend Gold</button>
       <!-- Additional actions can be added -->
     </section>
+	<section class="panel">
+  <h2>Data Management</h2>
+  <button id="exportBtn" class="action-btn">Export Data</button>
+  <button id="importBtn" class="action-btn">Import Data</button>
+  <!-- Hidden file input for import -->
+  <input type="file" id="importFile" style="display: none;">
+</section>
+
   </main>
   
   <script>
@@ -103,5 +111,62 @@
     });
   }
 </script>
+<script>
+  // Export data function
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    // Collect keys to export (you can add more keys if needed)
+    const data = {
+      character: localStorage.getItem('character'),
+      inventory: localStorage.getItem('inventory'),
+      quests: localStorage.getItem('quests'),
+      shopBasket: localStorage.getItem('shopBasket')
+    };
+    const dataStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'character_backup.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
+
+  // Import data function: trigger file input
+  document.getElementById('importBtn').addEventListener('click', () => {
+    document.getElementById('importFile').click();
+  });
+
+  // When a file is selected, read and import the data
+  document.getElementById('importFile').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          // Set each key from imported data if it exists
+          if (importedData.character) {
+            localStorage.setItem('character', importedData.character);
+          }
+          if (importedData.inventory) {
+            localStorage.setItem('inventory', importedData.inventory);
+          }
+          if (importedData.quests) {
+            localStorage.setItem('quests', importedData.quests);
+          }
+          if (importedData.shopBasket) {
+            localStorage.setItem('shopBasket', importedData.shopBasket);
+          }
+          alert("Data imported successfully. Please refresh the page to see the changes.");
+        } catch (err) {
+          alert("Failed to import data: " + err);
+        }
+      };
+      reader.readAsText(file);
+    }
+  });
+</script>
+
 </body>
 </html>
