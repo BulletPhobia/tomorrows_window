@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="#e8dec2">
+	<link rel="apple-touch-icon" href="icon-192.png">
+  <meta charset="UTF-8">
+  <title>Tomorrow's Window - Shop</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Grid of category cards */
+    .catalogue-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .catalogue-card {
+      background: #fff8e6;
+      border: 1px solid #b89b72;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .shop-item {
+      border: 1px solid #b89b72;
+      background: #fffdf7;
+      padding: 8px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .shop-item img {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    .item-desc {
+      font-size: 0.9em;
+      color: #555;
+    }
+    .back-btn {
+      margin-bottom: 10px;
+      background: #d1ba8a;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .search-bar {
+      margin-bottom: 10px;
+    }
+    .search-bar input {
+      padding: 6px;
+      border: 1px solid #b89b72;
+      border-radius: 4px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Shop</h1>
+    <nav class="nav">
+      <a href="index.html" class="nav-btn">Dashboard</a>
+      <a href="character.html" class="nav-btn">Character</a>
+      <a href="inventory.html" class="nav-btn">Inventory</a>
+      <a href="shop.html" class="nav-btn">Shop</a>
+      <a href="map.html" class="nav-btn">Map</a>
+      <a href="journal.html" class="nav-btn">Journal</a>
+    </nav>
+  </header>
+  
+  <main class="container shop-container">
+    <!-- Catalogue view -->
+    <section class="panel" id="catalogueView">
+      <h2>Shop Categories</h2>
+      <div class="search-bar">
+        <input type="text" id="catalogueSearch" placeholder="Search categories...">
+      </div>
+      <div class="catalogue-grid" id="catalogueGrid"></div>
+    </section>
+    
+    <!-- Category items view (hidden by default) -->
+    <section class="panel" id="categoryView" style="display:none;">
+      <button class="back-btn" id="backToCatalogue">Back to Categories</button>
+      <h2 id="categoryTitle"></h2>
+      <div id="categoryItems"></div>
+    </section>
+    
+    <!-- Shopping basket section -->
+    <section class="panel" id="shoppingBasket">
+      <h2>Shopping Basket</h2>
+      <div id="basketItems"></div>
+      <p>
+        Discount (%): <input type="number" id="discountInput" value="0" min="0" max="100" class="skill-input">
+      </p>
+      <p>Total: <span id="basketTotal">0</span>g</p>
+      <button class="action-btn" id="checkoutBtn">Checkout</button>
+    </section>
+  </main>
+  
+  <script>
+    // Predefined shop catalog (with full items from the PDF)
+    const shopCatalog = {
+      "Weapons": [
+        { name: "Chitin Dagger", description: "Short Blade: 1d4 damage, Cond. bonus 3", price: 50, category: "Weapon" },
+        { name: "Iron Dagger", description: "Short Blade: 1d4 damage, Cond. bonus 4", price: 75, category: "Weapon" },
+        { name: "Steel Dagger", description: "Short Blade: 1d4 damage, Cond. bonus 5", price: 100, category: "Weapon" },
+        { name: "Silver Dagger", description: "Short Blade: 1d4 damage, Cond. bonus 6", price: 125, category: "Weapon" },
+        { name: "Orcish Dagger", description: "Short Blade: 1d4 damage, Cond. bonus 7", price: 175, category: "Weapon" },
+        { name: "Chitin Shortsword", description: "Short Blade: 1d6 damage, Cond. bonus 3", price: 75, category: "Weapon" },
+        { name: "Iron Shortsword", description: "Short Blade: 1d6 damage, Cond. bonus 4", price: 115, category: "Weapon" },
+        { name: "Steel Shortsword", description: "Short Blade: 1d6 damage, Cond. bonus 5", price: 150, category: "Weapon" },
+        { name: "Silver Shortsword", description: "Short Blade: 1d6 damage, Cond. bonus 6", price: 185, category: "Weapon" },
+        { name: "Orcish Shortsword", description: "Short Blade: 1d6 damage, Cond. bonus 7", price: 225, category: "Weapon" },
+        { name: "Chitin Longsword", description: "Long Blade: 1d8 damage, Cond. bonus 3", price: 125, category: "Weapon" },
+        { name: "Iron Longsword", description: "Long Blade: 1d8 damage, Cond. bonus 4", price: 175, category: "Weapon" },
+        { name: "Steel Longsword", description: "Long Blade: 1d8 damage, Cond. bonus 5", price: 225, category: "Weapon" },
+        { name: "Silver Longsword", description: "Long Blade: 1d8 damage, Cond. bonus 6", price: 275, category: "Weapon" },
+        { name: "Orcish Longsword", description: "Long Blade: 1d8 damage, Cond. bonus 7", price: 325, category: "Weapon" }
+        // (Add other weapons from the PDF as needed.)
+      ],
+      "Armors": [
+        { name: "Chitin Armor Set", description: "Light Armor, Defense: d4", price: 50, category: "Armor" },
+        { name: "Leather Armor Set", description: "Light Armor, Defense: d4", price: 125, category: "Armor" },
+        { name: "Nordic Fur Armor Set", description: "Light Armor, Defense: d4", price: 225, category: "Armor" },
+        { name: "Chainmail Armor Set", description: "Medium Armor, Defense: d6", price: 175, category: "Armor" },
+        { name: "Bonemold Armor Set", description: "Medium Armor, Defense: d6", price: 285, category: "Armor" },
+        { name: "Orcish Armor Set", description: "Medium Armor, Defense: d6", price: 400, category: "Armor" },
+        { name: "Iron Armor Set", description: "Heavy Armor, Defense: d8", price: 250, category: "Armor" },
+        { name: "Steel Armor Set", description: "Heavy Armor, Defense: d8", price: 360, category: "Armor" },
+        { name: "Dwemer Armor Set", description: "Heavy Armor, Defense: d8", price: 475, category: "Armor" },
+        { name: "Chitin Shield", description: "Shield, Defense: d4", price: 45, category: "Armor" },
+        { name: "Iron Shield", description: "Shield, Defense: d4", price: 112, category: "Armor" },
+        { name: "Steel Shield", description: "Shield, Defense: d4", price: 180, category: "Armor" },
+        { name: "Silver Shield", description: "Shield, Defense: d4", price: 250, category: "Armor" },
+        { name: "Orcish Shield", description: "Shield, Defense: d4", price: 325, category: "Armor" }
+      ],
+      "Potions": [
+        { name: "Poor Potion of Health", description: "Restores Health (1d4)", price: 12, category: "Consumable" },
+        { name: "Bargain Potion of Health", description: "Restores Health (1d6)", price: 18, category: "Consumable" },
+        { name: "Cheap Potion of Health", description: "Restores Health (1d8)", price: 24, category: "Consumable" },
+        { name: "Standard Potion of Health", description: "Restores Health (1d10)", price: 30, category: "Consumable" },
+        { name: "Good Potion of Health", description: "Restores Health (2d6)", price: 36, category: "Consumable" },
+        { name: "Quality Potion of Health", description: "Restores Health (2d8)", price: 42, category: "Consumable" },
+        { name: "Exquisite Potion of Health", description: "Restores Health (2d10)", price: 54, category: "Consumable" },
+        { name: "Poor Potion of Magicka", description: "Restores Magicka (1d4)", price: 16, category: "Consumable" },
+        { name: "Bargain Potion of Magicka", description: "Restores Magicka (1d6)", price: 24, category: "Consumable" },
+        { name: "Cheap Potion of Magicka", description: "Restores Magicka (1d8)", price: 30, category: "Consumable" },
+        { name: "Standard Potion of Magicka", description: "Restores Magicka (1d10)", price: 38, category: "Consumable" },
+        { name: "Good Potion of Magicka", description: "Restores Magicka (2d6)", price: 45, category: "Consumable" },
+        { name: "Quality Potion of Magicka", description: "Restores Magicka (2d8)", price: 54, category: "Consumable" },
+        { name: "Exquisite Potion of Magicka", description: "Restores Magicka (2d10)", price: 70, category: "Consumable" },
+        { name: "Poor Potion of Fatigue", description: "Restores Fatigue (1d4)", price: 12, category: "Consumable" },
+        { name: "Bargain Potion of Fatigue", description: "Restores Fatigue (1d6)", price: 18, category: "Consumable" },
+        { name: "Cheap Potion of Fatigue", description: "Restores Fatigue (1d8)", price: 24, category: "Consumable" },
+        { name: "Standard Potion of Fatigue", description: "Restores Fatigue (1d10)", price: 30, category: "Consumable" },
+        { name: "Good Potion of Fatigue", description: "Restores Fatigue (2d6)", price: 36, category: "Consumable" },
+        { name: "Quality Potion of Fatigue", description: "Restores Fatigue (2d8)", price: 42, category: "Consumable" },
+        { name: "Exquisite Potion of Fatigue", description: "Restores Fatigue (2d10)", price: 54, category: "Consumable" },
+        { name: "Cure Disease", description: "Cures all diseases", price: 36, category: "Consumable" },
+        { name: "Cure Poison", description: "Cures poison", price: 40, category: "Consumable" },
+        { name: "Cure Paralysis", description: "Cures paralysis", price: 42, category: "Consumable" },
+        { name: "Resist Fire", description: "Gain 4 points of fire resistance for 1 min", price: 38, category: "Consumable" },
+        { name: "Resist Frost", description: "Gain 4 points of frost resistance for 1 min", price: 38, category: "Consumable" }
+      ],
+      "Scrolls": [
+        { name: "Scroll of Healing", description: "Restore 10 health", price: 85, category: "Consumable" },
+        { name: "Scroll of Vigor", description: "Restore 18 fatigue", price: 115, category: "Consumable" },
+        { name: "Scroll of Flameguard", description: "Gain 4 points of fire resistance for 1 min", price: 70, category: "Consumable" },
+        { name: "Scroll of Frostguard", description: "Gain 4 points of frost resistance for 1 min", price: 70, category: "Consumable" },
+        { name: "Scroll of Shockguard", description: "Gain 4 points of shock resistance for 1 min", price: 70, category: "Consumable" },
+        { name: "Scroll of Panacea", description: "Cure disease", price: 120, category: "Consumable" },
+        { name: "Scroll of Purity", description: "Cure disease, poison and paralysis", price: 150, category: "Consumable" },
+        { name: "Scroll of Taldam's Scorcher", description: "Do 10 points of fire damage", price: 85, category: "Consumable" },
+        { name: "Scroll of Hellfire", description: "Do 15 points of fire damage", price: 135, category: "Consumable" },
+        { name: "Scroll of Illnea's Breath", description: "Do 10 points of frost damage", price: 85, category: "Consumable" },
+        { name: "Scroll of Winter Guest", description: "Do 15 points of frost damage", price: 135, category: "Consumable" },
+        { name: "Scroll of Drathis' Soulrot", description: "Do 10 points of initial poison damage (30 sec)", price: 90, category: "Consumable" },
+        { name: "Scroll of Inas' Storm", description: "Do 10 points of shock damage", price: 85, category: "Consumable" },
+        { name: "Scroll of Nerusi's Lockjaw", description: "Silence target for 1 min", price: 145, category: "Consumable" },
+        { name: "Scroll of Ondusi's Unhinging", description: "Open any lock", price: 150, category: "Consumable" },
+        { name: "Scroll of Phyggi's Gem-Feeder", description: "Cause target’s soul to be caught in a soul gem (1 min)", price: 125, category: "Consumable" },
+        { name: "Scroll of Tanassa's Spellmire", description: "Absorb the magicka from the next spell that targets you", price: 165, category: "Consumable" },
+        { name: "Scroll of Reynos' Gills", description: "Breathe underwater for 5 min", price: 120, category: "Consumable" },
+        { name: "Scroll of Selyn's Mist Slippers", description: "Walk on water for 1 min", price: 100, category: "Consumable" },
+        { name: "Scroll of Inas' Mystic Finger", description: "Move light objects up to 25 ft for 1 min", price: 90, category: "Consumable" },
+        { name: "Scroll of Tanassa's Spelltrap", description: "Reflect any magical attack back onto the caster for 1 min", price: 180, category: "Consumable" },
+        { name: "Scroll of The First Barrier", description: "Gain a magical shield for 30 sec", price: 100, category: "Consumable" },
+        { name: "Scroll of The Second Barrier", description: "Gain a magical shield for 1 min", price: 160, category: "Consumable" },
+        { name: "Scroll of the Third Barrier", description: "Gain a magical shield for 1 min 30 sec", price: 210, category: "Consumable" },
+        { name: "Scroll of Psychic Prison", description: "Paralyze target for 30 sec", price: 130, category: "Consumable" },
+        { name: "Scroll of Lliros' Glowing Eye", description: "See in the dark for 5 min", price: 100, category: "Consumable" },
+        { name: "Scroll of Galmes' Seal", description: "Lock any locking mechanism", price: 90, category: "Consumable" },
+        { name: "Scroll of Brightball", description: "Create a glowing orb for 50 ft vision for 5 min", price: 80, category: "Consumable" },
+        { name: "Scroll of Windwalker", description: "Levitate for 1 min", price: 125, category: "Consumable" },
+        { name: "Scroll of Tinur's Hoptoad", description: "Slowfall for 1 min", price: 125, category: "Consumable" },
+        { name: "Scroll of Breva's Averted Eyes", description: "Invisibility for 1 min", price: 150, category: "Consumable" },
+        { name: "Scroll of Monden's Instigator", description: "Target gets frenzied for 1 min", price: 145, category: "Consumable" },
+        { name: "Scroll of Savage Might", description: "Gain 10 points of ST for 1 min", price: 100, category: "Consumable" },
+        { name: "Scroll of Insight", description: "Gain 10 points of IN for 1 min", price: 100, category: "Consumable" },
+        { name: "Scroll of The Oathfast", description: "Gain 10 points of WP for 1 min", price: 100, category: "Consumable" },
+        { name: "Scroll of The Dawn Sprite", description: "Gain 10 points of AG for 1 min", price: 100, category: "Consumable" },
+        { name: "Scroll of Heartwise", description: "Gain 10 points of PS for 1 min", price: 100, category: "Consumable" },
+        { name: "Scroll of Warrior's Blessing", description: "Gain +2 hit chance for 1 min", price: 100, category: "Consumable" },
+        { name: "Scroll of Juiceda's Feather", description: "Ignore armor penalties for 1 min", price: 100, category: "Consumable" },
+        { name: "Scroll of Black Death", description: "Damage health for 12 points", price: 120, category: "Consumable" },
+        { name: "Scroll of Black Storm", description: "Damage magicka for 12 points", price: 120, category: "Consumable" },
+        { name: "Scroll of Black Despair", description: "Damage 10 points of WP", price: 100, category: "Consumable" },
+        { name: "Scroll of Black Weakness", description: "Damage 10 points of ST", price: 100, category: "Consumable" },
+        { name: "Scroll of Black Mind", description: "Damage 10 points of IN", price: 100, category: "Consumable" },
+        { name: "Scroll of Black Sloth", description: "Damage 10 points of AG", price: 100, category: "Consumable" },
+        { name: "Scroll of Black Scorn", description: "Damage 10 points of PS", price: 100, category: "Consumable" },
+        { name: "Scroll of Baleful Suffering", description: "Damage health, magicka and fatigue for 8 points; disintegrate armor/weapon by 50", price: 200, category: "Consumable" },
+        { name: "Scroll of Lesser Domination", description: "Command a creature for 3 min", price: 180, category: "Consumable" },
+        { name: "Scroll of Greater Domination", description: "Command a humanoid for 3 min", price: 250, category: "Consumable" },
+        { name: "Scroll of Mark", description: "Mark a point for teleportation", price: 85, category: "Consumable" },
+        { name: "Scroll of Leaguestep", description: "Teleport to a previously set mark", price: 65, category: "Consumable" }
+      ],
+      "Food": [
+        { name: "Bread", description: "Restores 2 fatigue", price: 4, category: "Consumable" },
+        { name: "Small Kwama Egg", description: "Restores 1 health and 2 fatigue", price: 6, category: "Consumable" },
+        { name: "Large Kwama Egg", description: "Restores 2 health and 4 fatigue", price: 10, category: "Consumable" },
+        { name: "Scrib Jelly", description: "Restores 2 fatigue and 2 magicka", price: 10, category: "Consumable" },
+        { name: "Crab Meat", description: "Restores 4 health and 2 fatigue", price: 25, category: "Consumable" },
+        { name: "Guar Meat", description: "Restores 6 health and 4 fatigue", price: 45, category: "Consumable" },
+        { name: "Flin Alcohol", description: "Increase ST by 10, decrease AG by 5 for 30 min", price: 30, category: "Consumable" },
+        { name: "Greef Alcohol", description: "Increase WP by 10, decrease AG by 5 for 30 min", price: 30, category: "Consumable" }
+      ],
+      "Tools": [
+        { name: "Apprentice's Lockpick", description: "15 uses", price: 24, category: "Custom" },
+        { name: "Journeyman's Lockpick", description: "30 uses", price: 38, category: "Custom" },
+        { name: "Master's Lockpick", description: "35 uses + 2 bonus", price: 60, category: "Custom" },
+        { name: "Apprentice's Probe", description: "15 uses", price: 24, category: "Custom" },
+        { name: "Journeyman's Probe", description: "30 uses", price: 38, category: "Custom" },
+        { name: "Master's Probe", description: "35 uses + 2 bonus", price: 60, category: "Custom" },
+        { name: "Apprentice's Repair Hammer", description: "Roll d6 per Armorer level", price: 28, category: "Custom" },
+        { name: "Journeyman's Repair Hammer", description: "Roll d10 per Armorer level", price: 40, category: "Custom" },
+        { name: "Master's Repair Hammer", description: "Roll d20 per Armorer level", price: 65, category: "Custom" },
+        { name: "Torch", description: "15 ft vision for 1 hour", price: 10, category: "Consumable" },
+        { name: "Lantern", description: "25 ft vision for 3 hours", price: 28, category: "Consumable" },
+        { name: "Rope", description: "Tie objects or descend (10g per 5ft)", price: 10, category: "Custom" }
+      ],
+      "Town Services": [
+        { name: "Training (Lvl 1-5)", description: "100g per level", price: 100, category: "Service" },
+        { name: "Training (Lvl 6-10)", description: "250g per level", price: 250, category: "Service" },
+        { name: "Training (Lvl 11-15)", description: "300g per level", price: 300, category: "Service" },
+        { name: "Training (Lvl 16-19)", description: "500g per level", price: 500, category: "Service" }
+      ]
+    };
+    
+    let shopBasket = JSON.parse(localStorage.getItem('shopBasket')) || [];
+    function saveBasket() {
+      localStorage.setItem('shopBasket', JSON.stringify(shopBasket));
+    }
+    
+    // Catalogue view: Display category cards in a 3-per-row grid
+    function renderCatalogue() {
+      const grid = document.getElementById("catalogueGrid");
+      grid.innerHTML = "";
+      Object.keys(shopCatalog).forEach(category => {
+        let card = document.createElement("div");
+        card.className = "catalogue-card";
+        card.innerText = category;
+        card.addEventListener("click", function() {
+          showCategoryItems(category);
+        });
+        grid.appendChild(card);
+      });
+    }
+    
+    // Search in catalogue (filter category cards)
+    document.getElementById("catalogueSearch").addEventListener("input", function() {
+      const searchText = this.value.toLowerCase();
+      const cards = document.querySelectorAll(".catalogue-card");
+      cards.forEach(card => {
+        if(card.innerText.toLowerCase().indexOf(searchText) !== -1) {
+          card.style.display = "block";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    });
+    
+    // Category items view: Show all items in selected category
+    function showCategoryItems(category) {
+      document.getElementById("catalogueView").style.display = "none";
+      const catView = document.getElementById("categoryView");
+      catView.style.display = "block";
+      document.getElementById("categoryTitle").innerText = category;
+      const catItemsDiv = document.getElementById("categoryItems");
+      catItemsDiv.innerHTML = "";
+      shopCatalog[category].forEach((item, index) => {
+        let itemDiv = document.createElement("div");
+        itemDiv.className = "shop-item";
+        let imgTag = "";
+        if(item.image) {
+          imgTag = `<img src="${item.image}" alt="${item.name}">`;
+        }
+        itemDiv.innerHTML = `${imgTag}<strong>${item.name}</strong> - ${item.price}g<br/>
+          <span class="item-desc">${item.description}</span><br/>
+          <button class="action-btn addToBasketBtn" data-category="${category}" data-index="${index}">Add to Basket</button>`;
+        // Double-click to add/edit image for catalogue item
+        itemDiv.addEventListener("dblclick", function() {
+          let fileInput = document.createElement("input");
+          fileInput.type = "file";
+          fileInput.accept = "image/*";
+          fileInput.onchange = function(event) {
+            const file = event.target.files[0];
+            if(file) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                shopCatalog[category][index].image = e.target.result;
+                renderCategoryItems(category);
+              };
+              reader.readAsDataURL(file);
+            }
+          };
+          fileInput.click();
+        });
+        catItemsDiv.appendChild(itemDiv);
+      });
+      // Attach event handlers for add-to-basket buttons
+      document.querySelectorAll(".addToBasketBtn").forEach(btn => {
+        btn.addEventListener("click", function() {
+          let cat = this.dataset.category;
+          let idx = this.dataset.index;
+          addToBasket(shopCatalog[cat][idx]);
+        });
+      });
+    }
+    
+    // Back button to return to catalogue
+    document.getElementById("backToCatalogue").addEventListener("click", function() {
+      document.getElementById("categoryView").style.display = "none";
+      document.getElementById("catalogueView").style.display = "block";
+    });
+    
+    function renderCategoryItems(category) {
+      showCategoryItems(category);
+    }
+    
+    function renderBasket() {
+      const basketDiv = document.getElementById("basketItems");
+      basketDiv.innerHTML = "";
+      let subtotal = 0;
+      shopBasket.forEach((item, index) => {
+        subtotal += item.price * item.qty;
+        let itemDiv = document.createElement("div");
+        itemDiv.className = "basket-item";
+        let imgTag = "";
+        if(item.image) {
+          imgTag = `<img src="${item.image}" alt="${item.name}">`;
+        }
+        itemDiv.innerHTML = `${imgTag}<span>${item.name} x ${item.qty} - ${item.price * item.qty}g</span>
+                             <button class="action-btn removeFromBasketBtn" data-index="${index}">Remove</button>`;
+        basketDiv.appendChild(itemDiv);
+      });
+      let discount = parseInt(document.getElementById("discountInput").value) || 0;
+      let total = Math.round(subtotal * (1 - discount / 100));
+      document.getElementById("basketTotal").innerText = total;
+      
+      document.querySelectorAll(".removeFromBasketBtn").forEach(btn => {
+        btn.addEventListener("click", function() {
+          let idx = this.dataset.index;
+          shopBasket.splice(idx,1);
+          saveBasket();
+          renderBasket();
+        });
+      });
+    }
+    
+    function addToBasket(item) {
+      let found = shopBasket.find(b => b.name === item.name);
+      if(found) {
+        found.qty++;
+      } else {
+        shopBasket.push({...item, qty: 1});
+      }
+      saveBasket();
+      renderBasket();
+    }
+    
+    document.getElementById("discountInput").addEventListener("change", renderBasket);
+    
+    document.getElementById("checkoutBtn").addEventListener("click", function() {
+      let total = parseInt(document.getElementById("basketTotal").innerText);
+      let charData = JSON.parse(localStorage.getItem('character')) || {gold:0};
+      if(charData.gold >= total) {
+        charData.gold -= total;
+        localStorage.setItem('character', JSON.stringify(charData));
+        alert("Purchase complete! " + total + " gold deducted.");
+        // Transfer basket items into inventory
+        let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+        shopBasket.forEach(function(item) {
+          let found = inventory.find(i => i.name === item.name);
+          if(found) {
+            found.qty = parseInt(found.qty) + parseInt(item.qty);
+          } else {
+            inventory.push({name: item.name, qty: item.qty, description: item.description, price: item.price, category: item.category, locked: false, image: item.image || null});
+          }
+        });
+        localStorage.setItem('inventory', JSON.stringify(inventory));
+        shopBasket = [];
+        saveBasket();
+        renderBasket();
+      } else {
+        alert("Not enough gold!");
+      }
+    });
+    
+    window.onload = function() {
+      renderCatalogue();
+      renderBasket();
+    };
+  </script>
+  <script>
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful');
+        })
+        .catch(error => {
+          console.log('ServiceWorker registration failed:', error);
+        });
+    });
+  }
+</script>
+</body>
+</html>

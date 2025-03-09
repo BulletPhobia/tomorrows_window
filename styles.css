@@ -1,0 +1,95 @@
+/* Basic reset and typography */
+body {
+  margin: 0;
+  font-family: 'Georgia', serif;
+  background: #f7f2e7; /* parchment-like background */
+  color: #333;
+}
+.header {
+  background: #e8dec2;
+  padding: 10px;
+  text-align: center;
+  border-bottom: 2px solid #b89b72;
+}
+.header h1 {
+  margin: 0;
+  font-size: 1.8em;
+}
+.nav {
+  margin-top: 10px;
+}
+.nav-btn {
+  background: #d1ba8a;
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  display: inline-block;
+}
+.nav-btn:hover {
+  background: #c0a670;
+}
+.container {
+  padding: 20px;
+}
+.panel {
+  background: #fff8e6;
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid #d1ba8a;
+  border-radius: 12px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+.action-btn {
+  background: #d1ba8a;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  margin-top: 10px;
+  cursor: pointer;
+}
+.action-btn:hover {
+  background: #c0a670;
+}
+input[type="text"], input[type="number"], textarea {
+  width: 90%;
+  padding: 8px;
+  margin: 5px 0;
+  border: 1px solid #b89b72;
+  border-radius: 6px;
+}
+textarea {
+  height: 100px;
+  resize: vertical;
+}
+.inventory-item, .shop-item, .basket-item, .quest-entry {
+  border: 1px solid #b89b72;
+  background: #fffdf7;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.annotation {
+  background: #fffdf7;
+  border: 1px solid #b89b72;
+  border-radius: 8px;
+  padding: 5px;
+  margin: 5px 0;
+}
+.shop-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+#itemsForSale, #shoppingBasket {
+  flex: 1 1 45%;
+  min-width: 300px;
+  margin: 10px;
+}

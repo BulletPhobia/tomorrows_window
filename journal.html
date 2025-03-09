@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="#e8dec2">
+	<link rel="apple-touch-icon" href="icon-192.png">
+  <meta charset="UTF-8">
+  <title>Tomorrow's Window - Journal</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .quest-image { width: 60px; height: 60px; object-fit: cover; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Journal & Quest Log</h1>
+  <nav class="nav">
+  <a href="index.html" class="nav-btn">Dashboard</a>
+  <a href="character.html" class="nav-btn">Character</a>
+  <a href="inventory.html" class="nav-btn">Inventory</a>
+  <a href="shop.html" class="nav-btn">Shop</a>
+  <a href="map.html" class="nav-btn">Map</a>
+  <a href="journal.html" class="nav-btn">Journal</a>
+</nav>
+
+  </header>
+  
+  <main class="container">
+    <section class="panel">
+      <h2>Quest Log</h2>
+      <div id="questLog"></div>
+      <button class="action-btn" id="addQuestBtn">Add Quest</button>
+    </section>
+    <section class="panel">
+      <h2>General Notes</h2>
+      <textarea id="generalNotes" placeholder="Enter your notes here..."></textarea>
+      <button class="action-btn" id="saveNotesBtn">Save Notes</button>
+    </section>
+  </main>
+  
+  <script>
+    let quests = JSON.parse(localStorage.getItem('quests')) || [];
+    
+    function renderQuests() {
+      const questDiv = document.getElementById("questLog");
+      questDiv.innerHTML = "";
+      quests.forEach((quest, index) => {
+        let qDiv = document.createElement("div");
+        qDiv.className = "quest-entry";
+        qDiv.innerHTML = `<strong>Title:</strong> <input type="text" data-index="${index}" class="questTitle" value="${quest.title}"><br/>
+                          <strong>Description:</strong><br/>
+                          <textarea data-index="${index}" class="questDesc">${quest.desc}</textarea><br/>
+                          <span>Attached Image: </span>
+                          ${ quest.image ? `<img src="${quest.image}" class="quest-image">` : "None" }
+                          <button class="action-btn uploadQuestImgBtn" data-index="${index}">Upload Image</button>
+                          <button class="action-btn saveQuestBtn" data-index="${index}">Save</button>
+                          <button class="action-btn removeQuestBtn" data-index="${index}">Remove</button>`;
+        questDiv.appendChild(qDiv);
+      });
+      
+      document.querySelectorAll(".removeQuestBtn").forEach(btn => {
+        btn.addEventListener("click", function() {
+          let idx = this.dataset.index;
+          quests.splice(idx, 1);
+          localStorage.setItem('quests', JSON.stringify(quests));
+          renderQuests();
+        });
+      });
+      
+      document.querySelectorAll(".saveQuestBtn").forEach(btn => {
+        btn.addEventListener("click", function() {
+          let idx = this.dataset.index;
+          let title = document.querySelector(`.questTitle[data-index="${idx}"]`).value;
+          let desc = document.querySelector(`.questDesc[data-index="${idx}"]`).value;
+          quests[idx].title = title;
+          quests[idx].desc = desc;
+          localStorage.setItem('quests', JSON.stringify(quests));
+          alert("Quest saved!");
+        });
+      });
+      
+      document.querySelectorAll(".uploadQuestImgBtn").forEach(btn => {
+        btn.addEventListener("click", function() {
+          let idx = this.dataset.index;
+          let fileInput = document.createElement("input");
+          fileInput.type = "file";
+          fileInput.accept = "image/*";
+          fileInput.onchange = function(event) {
+            const file = event.target.files[0];
+            if(file) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                quests[idx].image = e.target.result;
+                localStorage.setItem('quests', JSON.stringify(quests));
+                renderQuests();
+              }
+              reader.readAsDataURL(file);
+            }
+          };
+          fileInput.click();
+        });
+      });
+    }
+    
+    document.getElementById("addQuestBtn").addEventListener("click", function() {
+      let title = prompt("Enter quest title:");
+      if(title) {
+        quests.push({title, desc:"", image: null});
+        localStorage.setItem('quests', JSON.stringify(quests));
+        renderQuests();
+      }
+    });
+    
+    document.getElementById("saveNotesBtn").addEventListener("click", function() {
+      let notes = document.getElementById("generalNotes").value;
+      localStorage.setItem('generalNotes', notes);
+      alert("General notes saved!");
+    });
+    
+    window.onload = function() {
+      document.getElementById("generalNotes").value = localStorage.getItem('generalNotes') || "";
+      renderQuests();
+    };
+  </script>
+  <script>
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful');
+        })
+        .catch(error => {
+          console.log('ServiceWorker registration failed:', error);
+        });
+    });
+  }
+</script>
+</body>
+</html>

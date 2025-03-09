@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="#e8dec2">
+	<link rel="apple-touch-icon" href="icon-192.png">
+  <meta charset="UTF-8">
+  <title>Tomorrow's Window - Map</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <h1>Map & Annotations</h1>
+<nav class="nav">
+  <a href="index.html" class="nav-btn">Dashboard</a>
+  <a href="character.html" class="nav-btn">Character</a>
+  <a href="inventory.html" class="nav-btn">Inventory</a>
+  <a href="shop.html" class="nav-btn">Shop</a>
+  <a href="map.html" class="nav-btn">Map</a>
+  <a href="journal.html" class="nav-btn">Journal</a>
+</nav>
+
+  </header>
+  
+  <main class="container">
+    <section class="panel">
+      <h2>Upload Your Map</h2>
+      <input type="file" id="mapUpload" accept="image/*" />
+      <div id="mapContainer">
+        <!-- Map image will be displayed here -->
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Annotations</h2>
+      <p>Tap on the map to add a note.</p>
+      <div id="annotationList"></div>
+    </section>
+  </main>
+  
+  <script>
+    let currentMap = null;
+    let annotations = JSON.parse(localStorage.getItem('annotations')) || [];
+    
+    document.getElementById("mapUpload").addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      if(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentMap = e.target.result;
+          localStorage.setItem('currentMap', currentMap);
+          displayMap();
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    function displayMap() {
+      const mapDiv = document.getElementById("mapContainer");
+      mapDiv.innerHTML = "";
+      if(currentMap || localStorage.getItem('currentMap')) {
+        currentMap = currentMap || localStorage.getItem('currentMap');
+        let img = document.createElement("img");
+        img.src = currentMap;
+        img.id = "uploadedMap";
+        img.style.maxWidth = "100%";
+        img.style.borderRadius = "8px";
+        mapDiv.appendChild(img);
+        
+        // Add click listener to create annotation pins
+        img.addEventListener("click", function(e) {
+          let rect = img.getBoundingClientRect();
+          let x = e.clientX - rect.left;
+          let y = e.clientY - rect.top;
+          let note = prompt("Enter your annotation:");
+          if(note) {
+            annotations.push({x, y, note});
+            localStorage.setItem('annotations', JSON.stringify(annotations));
+            renderAnnotations();
+          }
+        });
+        
+        renderAnnotations();
+      }
+    }
+    
+    function renderAnnotations() {
+      const annDiv = document.getElementById("annotationList");
+      annDiv.innerHTML = "";
+      annotations.forEach((ann, index) => {
+        let div = document.createElement("div");
+        div.className = "annotation";
+        div.innerText = `Note: ${ann.note} (x:${ann.x}, y:${ann.y})`;
+        // Optionally add a remove button:
+        let rmBtn = document.createElement("button");
+        rmBtn.innerText = "X";
+        rmBtn.className = "action-btn";
+        rmBtn.addEventListener("click", function() {
+          annotations.splice(index,1);
+          localStorage.setItem('annotations', JSON.stringify(annotations));
+          renderAnnotations();
+        });
+        div.appendChild(rmBtn);
+        annDiv.appendChild(div);
+      });
+    }
+    
+    window.onload = function() {
+      if(localStorage.getItem('currentMap')) {
+        currentMap = localStorage.getItem('currentMap');
+        displayMap();
+      }
+    };
+  </script>
+  <script>
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful');
+        })
+        .catch(error => {
+          console.log('ServiceWorker registration failed:', error);
+        });
+    });
+  }
+</script>
+</body>
+</html>

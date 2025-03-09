@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="#e8dec2">
+	<link rel="apple-touch-icon" href="icon-192.png">
+  <meta charset="UTF-8">
+  <title>Tomorrow's Window - Character Sheet</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Styles for small skill inputs */
+    .skill-input { width: 40px; text-align: center; margin-left: 5px; }
+    table.skills-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+    table.skills-table th, table.skills-table td { border: 1px solid #b89b72; padding: 4px; text-align: center; }
+    table.skills-table th { background: #e8dec2; }
+    .main-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .main-info-grid label { display: block; }
+    /* Collapsible panel styles */
+    .collapsible { cursor: pointer; }
+    .collapsible-content { display: block; }
+    .collapsed { display: none; }
+    .toggle-btn { font-size: 0.8em; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Character Sheet</h1>
+ <nav class="nav">
+  <a href="index.html" class="nav-btn">Dashboard</a>
+  <a href="character.html" class="nav-btn">Character</a>
+  <a href="inventory.html" class="nav-btn">Inventory</a>
+  <a href="shop.html" class="nav-btn">Shop</a>
+  <a href="map.html" class="nav-btn">Map</a>
+  <a href="journal.html" class="nav-btn">Journal</a>
+</nav>
+
+  </header>
+  
+  <main class="container">
+    <!-- Main Info Section (Collapsible) -->
+    <section class="panel">
+      <h2 class="collapsible">Main Info <span class="toggle-btn">[-]</span></h2>
+      <div class="collapsible-content">
+        <form id="mainInfoForm">
+          <div class="main-info-grid">
+            <label>Name: <input type="text" id="name" /></label>
+            <label>Race: <input type="text" id="race" /></label>
+            <label>Class: <input type="text" id="class" /></label>
+            <label>Level: <input type="number" id="level" min="1" /></label>
+            <label>Gold: <input type="number" id="gold" /></label>
+            <label>Fate Points: <input type="number" id="fate" /></label>
+            <label>HP: <input type="number" id="hp" /></label>
+            <label>Max HP: <input type="number" id="maxHP" /></label>
+            <label>Magicka: <input type="number" id="magicka" /></label>
+            <label>Max Magicka: <input type="number" id="maxMagicka" /></label>
+            <label>Fatigue: <input type="number" id="fatigue" /></label>
+            <label>Max Fatigue: <input type="number" id="maxFatigue" /></label>
+          </div>
+          <button type="button" id="saveMainInfo" class="action-btn">Save Main Info</button>
+        </form>
+      </div>
+    </section>
+    
+    <!-- Skills Section (Collapsible) -->
+    <section class="panel">
+      <h2 class="collapsible">Skills <span class="toggle-btn">[-]</span></h2>
+      <div class="collapsible-content">
+        <!-- Combat Skills -->
+        <h3>Combat Skills</h3>
+        <table class="skills-table">
+          <thead>
+            <tr>
+              <th>Skill</th>
+              <th>Level</th>
+              <th>Dice</th>
+            </tr>
+          </thead>
+          <tbody id="combatSkills">
+            <tr>
+              <td>Short Blade</td>
+              <td><input type="number" id="shortBladeLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="shortBladeDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Long Blade</td>
+              <td><input type="number" id="longBladeLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="longBladeDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Axe</td>
+              <td><input type="number" id="axeLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="axeDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Blunt Weapon</td>
+              <td><input type="number" id="bluntLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="bluntDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Spear</td>
+              <td><input type="number" id="spearLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="spearDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Marksman</td>
+              <td><input type="number" id="marksmanLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="marksmanDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Hand-to-hand</td>
+              <td><input type="number" id="handLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="handDice" class="skill-input" min="0"></td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Armor Skills -->
+        <h3>Armor Skills</h3>
+        <table class="skills-table">
+          <thead>
+            <tr>
+              <th>Skill</th>
+              <th>Level</th>
+              <th>Dice</th>
+            </tr>
+          </thead>
+          <tbody id="armorSkills">
+            <tr>
+              <td>Light Armor</td>
+              <td><input type="number" id="lightArmorLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="lightArmorDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Medium Armor</td>
+              <td><input type="number" id="mediumArmorLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="mediumArmorDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Heavy Armor</td>
+              <td><input type="number" id="heavyArmorLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="heavyArmorDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Unarmored</td>
+              <td><input type="number" id="unarmoredLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="unarmoredDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Block</td>
+              <td><input type="number" id="blockLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="blockDice" class="skill-input" min="0"></td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Magical Skills -->
+        <h3>Magical Skills</h3>
+        <table class="skills-table">
+          <thead>
+            <tr>
+              <th>Skill</th>
+              <th>Level</th>
+              <th>Dice</th>
+            </tr>
+          </thead>
+          <tbody id="magicalSkills">
+            <tr>
+              <td>Destruction</td>
+              <td><input type="number" id="destructionLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="destructionDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Alteration</td>
+              <td><input type="number" id="alterationLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="alterationDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Illusion</td>
+              <td><input type="number" id="illusionLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="illusionDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Mysticism</td>
+              <td><input type="number" id="mysticismLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="mysticismDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Conjuration</td>
+              <td><input type="number" id="conjurationLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="conjurationDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Restoration</td>
+              <td><input type="number" id="restorationLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="restorationDice" class="skill-input" min="0"></td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Misc Skills -->
+        <h3>Misc Skills</h3>
+        <table class="skills-table">
+          <thead>
+            <tr>
+              <th>Skill</th>
+              <th>Level</th>
+              <th>Dice</th>
+            </tr>
+          </thead>
+          <tbody id="miscSkills">
+            <tr>
+              <td>Athletics</td>
+              <td><input type="number" id="athleticsLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="athleticsDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Acrobatics</td>
+              <td><input type="number" id="acrobaticsLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="acrobaticsDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Sneak</td>
+              <td><input type="number" id="sneakLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="sneakDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Security</td>
+              <td><input type="number" id="securityLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="securityDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Speechcraft</td>
+              <td><input type="number" id="speechcraftLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="speechcraftDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Mercantile</td>
+              <td><input type="number" id="mercantileLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="mercantileDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Alchemy</td>
+              <td><input type="number" id="alchemyLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="alchemyDice" class="skill-input" min="0"></td>
+            </tr>
+            <tr>
+              <td>Enchant</td>
+              <td><input type="number" id="enchantLevel" class="skill-input" min="0"></td>
+              <td><input type="number" id="enchantDice" class="skill-input" min="0"></td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <button type="button" id="saveSkills" class="action-btn">Save Skills</button>
+      </div>
+    </section>
+  </main>
+  
+  <script>
+    // Collapsible panels
+    document.querySelectorAll(".collapsible").forEach(header => {
+      header.addEventListener("click", function() {
+        let content = this.nextElementSibling;
+        if(content.classList.contains("collapsed")){
+          content.classList.remove("collapsed");
+          this.querySelector(".toggle-btn").innerText = "[-]";
+        } else {
+          content.classList.add("collapsed");
+          this.querySelector(".toggle-btn").innerText = "[+]";
+        }
+      });
+    });
+    
+    function loadCharacter() {
+      const charData = JSON.parse(localStorage.getItem('character')) || {
+        name: "",
+        race: "",
+        class: "",
+        level: 1,
+        gold: 0,
+        fate: 0,
+        hp: 0,
+        maxHP: 0,
+        magicka: 0,
+        maxMagicka: 0,
+        fatigue: 0,
+        maxFatigue: 0,
+        skills: {
+          shortBlade: {level:0, dice:0},
+          longBlade: {level:0, dice:0},
+          axe: {level:0, dice:0},
+          blunt: {level:0, dice:0},
+          spear: {level:0, dice:0},
+          marksman: {level:0, dice:0},
+          hand: {level:0, dice:0},
+          lightArmor: {level:0, dice:0},
+          mediumArmor: {level:0, dice:0},
+          heavyArmor: {level:0, dice:0},
+          unarmored: {level:0, dice:0},
+          block: {level:0, dice:0},
+          destruction: {level:0, dice:0},
+          alteration: {level:0, dice:0},
+          illusion: {level:0, dice:0},
+          mysticism: {level:0, dice:0},
+          conjuration: {level:0, dice:0},
+          restoration: {level:0, dice:0},
+          athletics: {level:0, dice:0},
+          acrobatics: {level:0, dice:0},
+          sneak: {level:0, dice:0},
+          security: {level:0, dice:0},
+          speechcraft: {level:0, dice:0},
+          mercantile: {level:0, dice:0},
+          alchemy: {level:0, dice:0},
+          enchant: {level:0, dice:0}
+        }
+      };
+      // Main Info
+      document.getElementById("name").value = charData.name;
+      document.getElementById("race").value = charData.race;
+      document.getElementById("class").value = charData.class;
+      document.getElementById("level").value = charData.level;
+      document.getElementById("gold").value = charData.gold;
+      document.getElementById("fate").value = charData.fate;
+      document.getElementById("hp").value = charData.hp;
+      document.getElementById("maxHP").value = charData.maxHP;
+      document.getElementById("magicka").value = charData.magicka;
+      document.getElementById("maxMagicka").value = charData.maxMagicka;
+      document.getElementById("fatigue").value = charData.fatigue;
+      document.getElementById("maxFatigue").value = charData.maxFatigue;
+      
+      // Skills (Combat)
+      document.getElementById("shortBladeLevel").value = charData.skills.shortBlade.level;
+      document.getElementById("shortBladeDice").value = charData.skills.shortBlade.dice;
+      document.getElementById("longBladeLevel").value = charData.skills.longBlade.level;
+      document.getElementById("longBladeDice").value = charData.skills.longBlade.dice;
+      document.getElementById("axeLevel").value = charData.skills.axe.level;
+      document.getElementById("axeDice").value = charData.skills.axe.dice;
+      document.getElementById("bluntLevel").value = charData.skills.blunt.level;
+      document.getElementById("bluntDice").value = charData.skills.blunt.dice;
+      document.getElementById("spearLevel").value = charData.skills.spear.level;
+      document.getElementById("spearDice").value = charData.skills.spear.dice;
+      document.getElementById("marksmanLevel").value = charData.skills.marksman.level;
+      document.getElementById("marksmanDice").value = charData.skills.marksman.dice;
+      document.getElementById("handLevel").value = charData.skills.hand.level;
+      document.getElementById("handDice").value = charData.skills.hand.dice;
+      
+      // Armor Skills
+      document.getElementById("lightArmorLevel").value = charData.skills.lightArmor.level;
+      document.getElementById("lightArmorDice").value = charData.skills.lightArmor.dice;
+      document.getElementById("mediumArmorLevel").value = charData.skills.mediumArmor.level;
+      document.getElementById("mediumArmorDice").value = charData.skills.mediumArmor.dice;
+      document.getElementById("heavyArmorLevel").value = charData.skills.heavyArmor.level;
+      document.getElementById("heavyArmorDice").value = charData.skills.heavyArmor.dice;
+      document.getElementById("unarmoredLevel").value = charData.skills.unarmored.level;
+      document.getElementById("unarmoredDice").value = charData.skills.unarmored.dice;
+      document.getElementById("blockLevel").value = charData.skills.block.level;
+      document.getElementById("blockDice").value = charData.skills.block.dice;
+      
+      // Magical Skills
+      document.getElementById("destructionLevel").value = charData.skills.destruction.level;
+      document.getElementById("destructionDice").value = charData.skills.destruction.dice;
+      document.getElementById("alterationLevel").value = charData.skills.alteration.level;
+      document.getElementById("alterationDice").value = charData.skills.alteration.dice;
+      document.getElementById("illusionLevel").value = charData.skills.illusion.level;
+      document.getElementById("illusionDice").value = charData.skills.illusion.dice;
+      document.getElementById("mysticismLevel").value = charData.skills.mysticism.level;
+      document.getElementById("mysticismDice").value = charData.skills.mysticism.dice;
+      document.getElementById("conjurationLevel").value = charData.skills.conjuration.level;
+      document.getElementById("conjurationDice").value = charData.skills.conjuration.dice;
+      document.getElementById("restorationLevel").value = charData.skills.restoration.level;
+      document.getElementById("restorationDice").value = charData.skills.restoration.dice;
+      
+      // Misc Skills
+      document.getElementById("athleticsLevel").value = charData.skills.athletics.level;
+      document.getElementById("athleticsDice").value = charData.skills.athletics.dice;
+      document.getElementById("acrobaticsLevel").value = charData.skills.acrobatics.level;
+      document.getElementById("acrobaticsDice").value = charData.skills.acrobatics.dice;
+      document.getElementById("sneakLevel").value = charData.skills.sneak.level;
+      document.getElementById("sneakDice").value = charData.skills.sneak.dice;
+      document.getElementById("securityLevel").value = charData.skills.security.level;
+      document.getElementById("securityDice").value = charData.skills.security.dice;
+      document.getElementById("speechcraftLevel").value = charData.skills.speechcraft.level;
+      document.getElementById("speechcraftDice").value = charData.skills.speechcraft.dice;
+      document.getElementById("mercantileLevel").value = charData.skills.mercantile.level;
+      document.getElementById("mercantileDice").value = charData.skills.mercantile.dice;
+      document.getElementById("alchemyLevel").value = charData.skills.alchemy.level;
+      document.getElementById("alchemyDice").value = charData.skills.alchemy.dice;
+      document.getElementById("enchantLevel").value = charData.skills.enchant.level;
+      document.getElementById("enchantDice").value = charData.skills.enchant.dice;
+    }
+    
+    function saveCharacter(data) {
+      localStorage.setItem('character', JSON.stringify(data));
+    }
+    
+    // Save Main Info
+    document.getElementById("saveMainInfo").addEventListener("click", function() {
+      let charData = JSON.parse(localStorage.getItem('character')) || {skills:{}}; 
+      charData.name = document.getElementById("name").value;
+      charData.race = document.getElementById("race").value;
+      charData.class = document.getElementById("class").value;
+      charData.level = parseInt(document.getElementById("level").value);
+      charData.gold = parseInt(document.getElementById("gold").value);
+      charData.fate = parseInt(document.getElementById("fate").value);
+      charData.hp = parseInt(document.getElementById("hp").value);
+      charData.maxHP = parseInt(document.getElementById("maxHP").value);
+      charData.magicka = parseInt(document.getElementById("magicka").value);
+      charData.maxMagicka = parseInt(document.getElementById("maxMagicka").value);
+      charData.fatigue = parseInt(document.getElementById("fatigue").value);
+      charData.maxFatigue = parseInt(document.getElementById("maxFatigue").value);
+      saveCharacter(charData);
+      alert("Main Info saved!");
+    });
+    
+    // Save Skills
+    document.getElementById("saveSkills").addEventListener("click", function() {
+      let charData = JSON.parse(localStorage.getItem('character')) || {skills:{}}; 
+      charData.skills.shortBlade = {
+        level: parseInt(document.getElementById("shortBladeLevel").value),
+        dice: parseInt(document.getElementById("shortBladeDice").value)
+      };
+      charData.skills.longBlade = {
+        level: parseInt(document.getElementById("longBladeLevel").value),
+        dice: parseInt(document.getElementById("longBladeDice").value)
+      };
+      charData.skills.axe = {
+        level: parseInt(document.getElementById("axeLevel").value),
+        dice: parseInt(document.getElementById("axeDice").value)
+      };
+      charData.skills.blunt = {
+        level: parseInt(document.getElementById("bluntLevel").value),
+        dice: parseInt(document.getElementById("bluntDice").value)
+      };
+      charData.skills.spear = {
+        level: parseInt(document.getElementById("spearLevel").value),
+        dice: parseInt(document.getElementById("spearDice").value)
+      };
+      charData.skills.marksman = {
+        level: parseInt(document.getElementById("marksmanLevel").value),
+        dice: parseInt(document.getElementById("marksmanDice").value)
+      };
+      charData.skills.hand = {
+        level: parseInt(document.getElementById("handLevel").value),
+        dice: parseInt(document.getElementById("handDice").value)
+      };
+      charData.skills.lightArmor = {
+        level: parseInt(document.getElementById("lightArmorLevel").value),
+        dice: parseInt(document.getElementById("lightArmorDice").value)
+      };
+      charData.skills.mediumArmor = {
+        level: parseInt(document.getElementById("mediumArmorLevel").value),
+        dice: parseInt(document.getElementById("mediumArmorDice").value)
+      };
+      charData.skills.heavyArmor = {
+        level: parseInt(document.getElementById("heavyArmorLevel").value),
+        dice: parseInt(document.getElementById("heavyArmorDice").value)
+      };
+      charData.skills.unarmored = {
+        level: parseInt(document.getElementById("unarmoredLevel").value),
+        dice: parseInt(document.getElementById("unarmoredDice").value)
+      };
+      charData.skills.block = {
+        level: parseInt(document.getElementById("blockLevel").value),
+        dice: parseInt(document.getElementById("blockDice").value)
+      };
+      charData.skills.destruction = {
+        level: parseInt(document.getElementById("destructionLevel").value),
+        dice: parseInt(document.getElementById("destructionDice").value)
+      };
+      charData.skills.alteration = {
+        level: parseInt(document.getElementById("alterationLevel").value),
+        dice: parseInt(document.getElementById("alterationDice").value)
+      };
+      charData.skills.illusion = {
+        level: parseInt(document.getElementById("illusionLevel").value),
+        dice: parseInt(document.getElementById("illusionDice").value)
+      };
+      charData.skills.mysticism = {
+        level: parseInt(document.getElementById("mysticismLevel").value),
+        dice: parseInt(document.getElementById("mysticismDice").value)
+      };
+      charData.skills.conjuration = {
+        level: parseInt(document.getElementById("conjurationLevel").value),
+        dice: parseInt(document.getElementById("conjurationDice").value)
+      };
+      charData.skills.restoration = {
+        level: parseInt(document.getElementById("restorationLevel").value),
+        dice: parseInt(document.getElementById("restorationDice").value)
+      };
+      charData.skills.athletics = {
+        level: parseInt(document.getElementById("athleticsLevel").value),
+        dice: parseInt(document.getElementById("athleticsDice").value)
+      };
+      charData.skills.acrobatics = {
+        level: parseInt(document.getElementById("acrobaticsLevel").value),
+        dice: parseInt(document.getElementById("acrobaticsDice").value)
+      };
+      charData.skills.sneak = {
+        level: parseInt(document.getElementById("sneakLevel").value),
+        dice: parseInt(document.getElementById("sneakDice").value)
+      };
+      charData.skills.security = {
+        level: parseInt(document.getElementById("securityLevel").value),
+        dice: parseInt(document.getElementById("securityDice").value)
+      };
+      charData.skills.speechcraft = {
+        level: parseInt(document.getElementById("speechcraftLevel").value),
+        dice: parseInt(document.getElementById("speechcraftDice").value)
+      };
+      charData.skills.mercantile = {
+        level: parseInt(document.getElementById("mercantileLevel").value),
+        dice: parseInt(document.getElementById("mercantileDice").value)
+      };
+      charData.skills.alchemy = {
+        level: parseInt(document.getElementById("alchemyLevel").value),
+        dice: parseInt(document.getElementById("alchemyDice").value)
+      };
+      charData.skills.enchant = {
+        level: parseInt(document.getElementById("enchantLevel").value),
+        dice: parseInt(document.getElementById("enchantDice").value)
+      };
+      saveCharacter(charData);
+      alert("Skills saved!");
+    });
+    
+    window.onload = loadCharacter;
+  </script>
+  <script>
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful');
+        })
+        .catch(error => {
+          console.log('ServiceWorker registration failed:', error);
+        });
+    });
+  }
+</script>
+</body>
+</html>

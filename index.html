@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="#e8dec2">
+	<link rel="apple-touch-icon" href="icon-192.png">
+  <meta charset="UTF-8">
+  <title>Tomorrow's Window - Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <h1>Tomorrow's Window</h1>
+<nav class="nav">
+  <a href="index.html" class="nav-btn">Dashboard</a>
+  <a href="character.html" class="nav-btn">Character</a>
+  <a href="inventory.html" class="nav-btn">Inventory</a>
+  <a href="shop.html" class="nav-btn">Shop</a>
+  <a href="map.html" class="nav-btn">Map</a>
+  <a href="journal.html" class="nav-btn">Journal</a>
+</nav>
+
+  </header>
+  
+  <main class="container">
+    <section class="panel">
+      <h2>Character Overview</h2>
+      <div id="overview">
+        <!-- Dashboard data will be loaded here -->
+        <p><strong>Name:</strong> <span id="charName">Unknown</span></p>
+        <p><strong>Race:</strong> <span id="charRace">Unknown</span></p>
+        <p><strong>Class:</strong> <span id="charClass">Unknown</span></p>
+        <p><strong>Level:</strong> <span id="charLevel">1</span></p>
+        <p><strong>Gold:</strong> <span id="charGold">0</span>g</p>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Quick Actions</h2>
+      <button class="action-btn" id="addGoldBtn">Add Gold</button>
+      <button class="action-btn" id="spendGoldBtn">Spend Gold</button>
+      <!-- Additional actions can be added -->
+    </section>
+  </main>
+  
+  <script>
+    // Basic localStorage retrieval function
+    function loadCharacter() {
+      const charData = JSON.parse(localStorage.getItem('character')) || {
+        name: "Unknown",
+        race: "Unknown",
+        class: "Unknown",
+        level: 1,
+        gold: 0
+      };
+      document.getElementById("charName").innerText = charData.name;
+      document.getElementById("charRace").innerText = charData.race;
+      document.getElementById("charClass").innerText = charData.class;
+      document.getElementById("charLevel").innerText = charData.level;
+      document.getElementById("charGold").innerText = charData.gold;
+    }
+    
+    function saveCharacter(data) {
+      localStorage.setItem('character', JSON.stringify(data));
+    }
+    
+    // Initialize the dashboard on load
+    window.onload = function() {
+      loadCharacter();
+    };
+    
+    // Example actions for quick gold adjustment:
+    document.getElementById("addGoldBtn").addEventListener("click", function() {
+      let charData = JSON.parse(localStorage.getItem('character')) || {name:"Unknown", race:"Unknown", class:"Unknown", level:1, gold:0};
+      let amount = prompt("Enter gold to add:");
+      if(amount) {
+        charData.gold = parseInt(charData.gold) + parseInt(amount);
+        saveCharacter(charData);
+        loadCharacter();
+      }
+    });
+    
+    document.getElementById("spendGoldBtn").addEventListener("click", function() {
+      let charData = JSON.parse(localStorage.getItem('character')) || {name:"Unknown", race:"Unknown", class:"Unknown", level:1, gold:0};
+      let amount = prompt("Enter gold to spend:");
+      if(amount) {
+        charData.gold = parseInt(charData.gold) - parseInt(amount);
+        saveCharacter(charData);
+        loadCharacter();
+      }
+    });
+  </script>
+  <script>
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful');
+        })
+        .catch(error => {
+          console.log('ServiceWorker registration failed:', error);
+        });
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="#e8dec2">
+	<link rel="apple-touch-icon" href="icon-192.png">
+  <meta charset="UTF-8">
+  <title>Tomorrow's Window - Inventory</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .inventory-item {
+      border: 1px solid #b89b72;
+      background: #fffdf7;
+      padding: 8px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      position: relative;
+    }
+    .item-thumb {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    .item-details {
+      font-size: 0.9em;
+      color: #555;
+    }
+    .consume-btn {
+      background: red;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    .removeItemBtn, .lockBtn, .editItemBtn {
+      background: #d1ba8a;
+      color: #333;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    .search-bar {
+      margin-bottom: 10px;
+    }
+    .search-bar input,
+    .search-bar select {
+      padding: 6px;
+      border: 1px solid #b89b72;
+      border-radius: 4px;
+      margin-right: 5px;
+    }
+    /* Style for the inline edit form */
+    .edit-form input,
+    .edit-form textarea,
+    .edit-form select {
+      padding: 4px;
+      margin: 2px 0;
+      width: 90%;
+      border: 1px solid #b89b72;
+      border-radius: 4px;
+    }
+    .edit-form button {
+      margin-right: 5px;
+      padding: 4px 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Inventory</h1>
+    <nav class="nav">
+      <a href="index.html" class="nav-btn">Dashboard</a>
+      <a href="character.html" class="nav-btn">Character</a>
+      <a href="inventory.html" class="nav-btn">Inventory</a>
+      <a href="shop.html" class="nav-btn">Shop</a>
+      <a href="map.html" class="nav-btn">Map</a>
+      <a href="journal.html" class="nav-btn">Journal</a>
+    </nav>
+  </header>
+  <main class="container">
+    <section class="panel">
+      <h2>Your Items</h2>
+      <div class="search-bar">
+        <input type="text" id="inventorySearch" placeholder="Search inventory...">
+        <select id="inventoryCategoryFilter">
+          <option value="all">All Categories</option>
+          <option value="Consumable">Consumable</option>
+          <option value="Weapon">Weapon</option>
+          <option value="Armor">Armor</option>
+          <option value="Treasure">Treasure</option>
+          <option value="Artifact">Artifact</option>
+          <option value="Service">Service</option>
+          <option value="Custom">Custom</option>
+        </select>
+      </div>
+      <div id="inventoryList"></div>
+      <button class="action-btn" id="addItemBtn">Add Item</button>
+      <p class="hint">Double-click an item to add or edit its image.</p>
+    </section>
+  </main>
+  
+  <script>
+    // Load inventory from localStorage
+    function loadInventory() {
+      const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+      renderInventory(inventory);
+    }
+    
+    function saveInventory(inventory) {
+      localStorage.setItem('inventory', JSON.stringify(inventory));
+    }
+    
+    // Render inventory items with search and category filter applied
+    function renderInventory(items) {
+      const searchText = document.getElementById("inventorySearch").value.toLowerCase();
+      const selectedCat = document.getElementById("inventoryCategoryFilter").value;
+      
+      const invDiv = document.getElementById("inventoryList");
+      invDiv.innerHTML = "";
+      items.forEach((item, index) => {
+        if (item.name.toLowerCase().indexOf(searchText) === -1) return;
+        if (selectedCat !== "all" && item.category !== selectedCat) return;
+        
+        // Create the container for the item display
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "inventory-item";
+        itemDiv.dataset.index = index;
+        
+        let imgTag = "";
+        if(item.image) {
+          imgTag = `<img src="${item.image}" alt="${item.name}" class="item-thumb">`;
+        }
+        const lockStatus = item.locked ? "Unlock" : "Lock";
+        
+        // Display item details along with action buttons including "Edit"
+        itemDiv.innerHTML = `
+          ${imgTag}<strong>${item.name}</strong> (x${item.qty})<br/>
+          <div class="item-details">
+            <em>${item.description || "No description"}</em><br/>
+            Price: ${item.price || 0}g | Category: ${item.category || "Custom"}
+          </div>
+          <button class="consume-btn" ${item.locked ? "disabled" : ""}>Consume</button>
+          <button class="action-btn removeItemBtn" ${item.locked ? "disabled" : ""}>Remove</button>
+          <button class="action-btn lockBtn">${lockStatus}</button>
+          <button class="action-btn editItemBtn">Edit</button>
+        `;
+        invDiv.appendChild(itemDiv);
+        
+        // Double-click to add/edit image (remains unchanged)
+        itemDiv.addEventListener("dblclick", function() {
+          let fileInput = document.createElement("input");
+          fileInput.type = "file";
+          fileInput.accept = "image/*";
+          fileInput.onchange = function(event) {
+            const file = event.target.files[0];
+            if(file) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+                inventory[index].image = e.target.result;
+                saveInventory(inventory);
+                renderInventory(inventory);
+              }
+              reader.readAsDataURL(file);
+            }
+          };
+          fileInput.click();
+        });
+        
+        // Consume button reduces quantity by one if not locked
+        itemDiv.querySelector(".consume-btn").addEventListener("click", function() {
+          let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+          if (!inventory[index].locked) {
+            inventory[index].qty = parseInt(inventory[index].qty) - 1;
+            if(inventory[index].qty <= 0) {
+              inventory.splice(index, 1);
+            }
+            saveInventory(inventory);
+            renderInventory(inventory);
+          }
+        });
+        
+        // Remove button
+        itemDiv.querySelector(".removeItemBtn").addEventListener("click", function() {
+          let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+          if (!inventory[index].locked) {
+            inventory.splice(index, 1);
+            saveInventory(inventory);
+            renderInventory(inventory);
+          }
+        });
+        
+        // Lock/Unlock button toggles locked property
+        itemDiv.querySelector(".lockBtn").addEventListener("click", function() {
+          let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+          inventory[index].locked = !inventory[index].locked;
+          saveInventory(inventory);
+          renderInventory(inventory);
+        });
+        
+        // Edit button: open inline edit form
+        itemDiv.querySelector(".editItemBtn").addEventListener("click", function() {
+          openEditForm(itemDiv, index, item);
+        });
+      });
+    }
+    
+    // Function to open an inline edit form for an inventory item
+    function openEditForm(itemDiv, index, item) {
+      // Create a form element
+      const form = document.createElement("div");
+      form.className = "edit-form";
+      form.innerHTML = `
+        <label>Name: <input type="text" id="editName" value="${item.name}"></label><br/>
+        <label>Quantity: <input type="number" id="editQty" value="${item.qty}"></label><br/>
+        <label>Description: <textarea id="editDescription">${item.description || ""}</textarea></label><br/>
+        <label>Price (g): <input type="number" id="editPrice" value="${item.price || 0}"></label><br/>
+        <label>Category: 
+          <select id="editCategory">
+            <option value="Consumable">Consumable</option>
+            <option value="Weapon">Weapon</option>
+            <option value="Armor">Armor</option>
+            <option value="Treasure">Treasure</option>
+            <option value="Artifact">Artifact</option>
+            <option value="Service">Service</option>
+            <option value="Custom">Custom</option>
+          </select>
+        </label><br/>
+        <button class="action-btn" id="saveEditBtn">Save</button>
+        <button class="action-btn" id="cancelEditBtn">Cancel</button>
+      `;
+      // Pre-select the current category if set
+      const editCat = form.querySelector("#editCategory");
+      if(item.category) {
+        editCat.value = item.category;
+      }
+      
+      // Replace the item's innerHTML with the form temporarily
+      itemDiv.innerHTML = "";
+      itemDiv.appendChild(form);
+      
+      // Save button handler
+      form.querySelector("#saveEditBtn").addEventListener("click", function() {
+        let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+        inventory[index].name = form.querySelector("#editName").value;
+        inventory[index].qty = form.querySelector("#editQty").value;
+        inventory[index].description = form.querySelector("#editDescription").value;
+        inventory[index].price = form.querySelector("#editPrice").value;
+        inventory[index].category = form.querySelector("#editCategory").value;
+        saveInventory(inventory);
+        renderInventory(inventory);
+      });
+      
+      // Cancel button handler: simply re-render the inventory to cancel editing
+      form.querySelector("#cancelEditBtn").addEventListener("click", function() {
+        let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+        renderInventory(inventory);
+      });
+    }
+    
+    // Add Item button: now prompt only for name and quantity
+    document.getElementById("addItemBtn").addEventListener("click", function() {
+      let name = prompt("Enter item name:");
+      if(name) {
+        let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+        // New item is created with just a name and quantity; other fields default.
+        inventory.push({name, qty:1, description:"", price:0, category:"Custom", locked: false, image: null});
+        saveInventory(inventory);
+        renderInventory(inventory);
+      }
+    });
+    
+    document.getElementById("inventorySearch").addEventListener("input", function() {
+      let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+      renderInventory(inventory);
+    });
+    
+    document.getElementById("inventoryCategoryFilter").addEventListener("change", function() {
+      let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+      renderInventory(inventory);
+    });
+    
+    window.onload = loadInventory;
+  </script>
+  <script>
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful');
+        })
+        .catch(error => {
+          console.log('ServiceWorker registration failed:', error);
+        });
+    });
+  }
+</script>
+</body>
+</html>

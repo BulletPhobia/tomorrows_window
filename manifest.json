@@ -1,0 +1,21 @@
+{
+  "name": "Tomorrow's Window",
+  "short_name": "TW RPG",
+  "description": "Tabletop RPG character management system",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f7f2e7",
+  "theme_color": "#e8dec2",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
