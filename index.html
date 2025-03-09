@@ -158,7 +158,9 @@
           if (importedData.shopBasket) {
             localStorage.setItem('shopBasket', importedData.shopBasket);
           }
-          alert("Data imported successfully. Please refresh the page to see the changes.");
+          alert("Data imported successfully. The app will now reload.");
+			location.reload();
+
         } catch (err) {
           alert("Failed to import data: " + err);
         }
